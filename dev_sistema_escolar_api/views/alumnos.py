@@ -3,6 +3,7 @@ from django.db import transaction
 from dev_sistema_escolar_api.serializers import UserSerializer
 from dev_sistema_escolar_api.serializers import *
 from dev_sistema_escolar_api.models import *
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from rest_framework import generics
 from rest_framework import status
@@ -77,8 +78,38 @@ class AlumnosView(generics.CreateAPIView):
 
         return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    # Actualizar datos del alumno
-    # TODO: Agregar actualización de alumnos
+  # Obtener alumno por ID
+    def get(self, request, *args, **kwargs):
+        alumno = get_object_or_404(Alumnos, id=request.GET.get("id"))
+        alumno_data = AlumnoSerializer(alumno, many=False).data
+        return Response(alumno_data, 200)
+    
+    # Actualizar alumno
+    @transaction.atomic
+    def put(self, request, *args, **kwargs):
+        alumno = get_object_or_404(Alumnos, id=request.data["id"])
+        alumno.matricula = request.data["matricula"]
+        alumno.fecha_nacimiento = request.data["fecha_nacimiento"]
+        alumno.telefono = request.data["telefono"]
+        alumno.curp = request.data["curp"].upper()
+        alumno.rfc = request.data["rfc"].upper()
+        alumno.edad = request.data["edad"]
+        alumno.ocupacion = request.data["ocupacion"]
+        alumno.save()
+        
+        user = alumno.user
+        user.first_name = request.data["first_name"]
+        user.last_name = request.data["last_name"]
+        user.save()
+        
+        return Response({"message": "Alumno actualizado correctamente", "alumno": AlumnoSerializer(alumno).data}, 200)
     
     # Eliminar alumno con delete (Borrar realmente)
-    # TODO: Agregar eliminación de alumnos
+    @transaction.atomic
+    def delete(self, request, *args, **kwargs):
+        alumno = get_object_or_404(Alumnos, id=request.GET.get("id"))
+        try:
+            alumno.user.delete()
+            return Response({"details":"Alumno eliminado"},200)
+        except Exception as e:
+            return Response({"details":"Algo pasó al eliminar"},400)

@@ -8,6 +8,7 @@ from dev_sistema_escolar_api.views import users
 from dev_sistema_escolar_api.views import alumnos
 from dev_sistema_escolar_api.views import maestros
 from dev_sistema_escolar_api.views import auth
+from dev_sistema_escolar_api.views import eventos
 
 urlpatterns = [
    #Create Admin
@@ -18,6 +19,8 @@ urlpatterns = [
         #path('admins-edit/', users.AdminsViewEdit.as_view())
     #Create Alumno
         path('alumnos/', alumnos.AlumnosView.as_view()),
+     #Maestro Data
+        path('lista-alumnos/', alumnos.AlumnosAll.as_view()),
     #Create Maestro
         path('maestros/', maestros.MaestrosView.as_view()),
     #Maestro Data
@@ -27,8 +30,14 @@ urlpatterns = [
     #Login
         path('login/', auth.CustomAuthToken.as_view()),
     #Logout
-        path('logout/', auth.Logout.as_view())
+        path('logout/', auth.Logout.as_view()),
+    #Create evento
+    path('eventos-all/', eventos.EventosAll.as_view()),
+    #Eventos data
+    path('eventos-view/', eventos.EventosView.as_view())
+
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
